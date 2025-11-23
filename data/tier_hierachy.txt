@@ -1,0 +1,64 @@
+Tier 0
+Tier 1
+High 1-A
+1-A
+Low 1-A
+High 1-B
+1-B
+1-C
+Low 1-C
+Tier 2
+2-A
+2-B
+2-C
+Low 2-C
+Tier 3
+High 3-A
+3-A
+3-B
+3-C
+Tier 4
+4-A
+4-B
+High 4-C
+4-C
+Low 4-C
+Tier 5
+High 5-A
+5-A
+5-B
+Low 5-B
+5-C
+Tier 6
+High 6-A
+6-A
+High 6-B
+6-B
+Low 6-B
+High 6-C
+6-C
+Tier 7
+High 7-A
+7-A
+7-B
+Low 7-B
+High 7-C
+7-C
+Low 7-C
+Tier 8
+8-A
+8-B
+High 8-C
+8-C
+Tier 9
+9-A
+9-B
+9-C
+Tier 10
+10-A
+10-B
+10-C
+Tier 11
+11-A
+11-B
+11-C

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vsrdle</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="icon" href="assets/favicon.ico" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="vsrdle-root">
+<header class="site-header">
+  <div class="header-left">
+    <!-- Hamburger menu button on the far left -->
+    <button id="menu-toggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false">
+      ☰
+    </button>
+
+    <div class="header-title-block">
+      <div class="logo-row">
+        <img src="assets/logo-vsrdle.png" alt="Vsrdle logo" class="logo" />
+        <h1>Vsrdle</h1>
+      </div>
+      <div id="streak-display" class="streak-display">
+        Loading stats...
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide-out settings menu FROM THE LEFT -->
+  <div id="settings-menu" class="settings-menu" hidden>
+    <h2>Settings</h2>
+
+    <div class="settings-section">
+      <h3>Difficulty</h3>
+      <label class="toggle-row">
+        <input type="checkbox" id="very-hard-toggle" />
+        <span>Very hard mode (pairs within 4ish tiers)</span>
+      </label>
+    </div>
+
+    <div class="settings-section">
+    <h3>Appearance</h3>
+    <label class="toggle-row">
+      <input type="checkbox" id="light-mode-toggle" />
+      <span>Light mode</span>
+    </label>
+    </div>
+
+    <div class="settings-section">
+      <h3>Custom series</h3>
+      <label class="toggle-row">
+        <input type="checkbox" id="custom-mode-toggle" />
+        <span>Enable custom series filter</span>
+      </label>
+
+      <div id="custom-series-section" class="custom-series-section" hidden>
+        <p>Select series/origins to include:</p>
+        <div id="series-list" class="series-list">
+          <!-- checkboxes filled by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-actions">
+      <button id="menu-apply-button" class="control-button">
+        Apply & Restart Run
+      </button>
+    </div>
+  </div>
+  <div id="mode-select" class="mode-select">
+  <button id="mode-vs-button" class="control-button">
+    VS Mode
+  </button>
+  <button id="mode-odd-button" class="control-button">
+    Odd One Out
+  </button>
+</div>
+</header>
+
+
+    <main class="site-main">
+      <section id="game-section">
+        <div id="pair-container" class="pair-container">
+          <button id="card-left" class="vs-card">
+            Loading...
+          </button>
+
+          <div id="vs-label" class="vs-label">
+            VS
+          </div>
+
+          <button id="card-right" class="vs-card">
+            Loading...
+          </button>
+        </div>
+
+        <div class="info-row">
+          <button id="info-button" class="info-button" aria-expanded="false">
+            i
+          </button>
+          <div id="info-panel" class="info-panel" hidden></div>
+        </div>
+
+        <div id="controls" class="controls">
+          <button id="next-button" class="control-button" hidden>
+            Next
+          </button>
+          <button id="restart-button" class="control-button" hidden>
+            Restart
+          </button>
+        </div>
+      </section>
+      <section id="odd-mode-section">
+  <h2>Odd One Out</h2>
+  <div id="odd-streak-display" class="streak-display">
+    Odd mode loading...
+  </div>
+
+  <div class="odd-card-grid">
+    <button id="odd-card-0" class="vs-card">?</button>
+    <button id="odd-card-1" class="vs-card">?</button>
+    <button id="odd-card-2" class="vs-card">?</button>
+    <button id="odd-card-3" class="vs-card">?</button>
+  </div>
+
+  <div class="controls">
+    <button id="odd-next-button" class="control-button" hidden>Next</button>
+    <button id="odd-restart-button" class="control-button" hidden>Restart</button>
+  </div>
+</section>
+</section>
+    </main>
+    
+
+    <footer class="site-footer">
+      <p>Vsrdle &copy; 2025</p>
+    </footer>
+  </div>
+
+  <!-- JS entrypoint -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
