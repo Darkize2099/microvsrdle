@@ -10,77 +10,103 @@
 </head>
 <body>
   <div id="vsrdle-root">
-<header class="site-header">
-  <div class="header-left">
-    <!-- Hamburger menu button on the far left -->
-    <button id="menu-toggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false">
-      ☰
-    </button>
+    <header class="site-header">
+      <div class="header-left">
+        <!-- Hamburger menu button on the far left -->
+        <button id="menu-toggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false">
+          ☰
+        </button>
 
-    <div class="header-title-block">
-      <div class="logo-row">
-        <img src="assets/logo-vsrdle.png" alt="Vsrdle logo" class="logo" />
-        <h1>Vsrdle</h1>
-      </div>
-      <div id="streak-display" class="streak-display">
-        Loading stats...
-      </div>
-    </div>
-  </div>
-
-  <!-- Slide-out settings menu FROM THE LEFT -->
-  <div id="settings-menu" class="settings-menu" hidden>
-    <h2>Settings</h2>
-
-    <div class="settings-section">
-      <h3>Difficulty</h3>
-      <label class="toggle-row">
-        <input type="checkbox" id="very-hard-toggle" />
-        <span>Very hard mode (pairs within 4ish tiers)</span>
-      </label>
-    </div>
-
-    <div class="settings-section">
-    <h3>Appearance</h3>
-    <label class="toggle-row">
-      <input type="checkbox" id="light-mode-toggle" />
-      <span>Light mode</span>
-    </label>
-    </div>
-
-    <div class="settings-section">
-      <h3>Custom series</h3>
-      <label class="toggle-row">
-        <input type="checkbox" id="custom-mode-toggle" />
-        <span>Enable custom series filter</span>
-      </label>
-
-      <div id="custom-series-section" class="custom-series-section" hidden>
-        <p>Select series/origins to include:</p>
-        <div id="series-list" class="series-list">
-          <!-- checkboxes filled by JS -->
+        <div class="header-title-block">
+          <div class="logo-row">
+            <img src="assets/logo-vsrdle.png" alt="Vsrdle logo" class="logo" />
+            <h1>Vsrdle</h1>
+          </div>
+          <div id="streak-display" class="streak-display">
+            Loading stats...
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="settings-actions">
-      <button id="menu-apply-button" class="control-button">
-        Apply & Restart Run
-      </button>
-    </div>
-  </div>
-  <div id="mode-select" class="mode-select">
-  <button id="mode-vs-button" class="control-button">
-    VS Mode
-  </button>
-  <button id="mode-odd-button" class="control-button">
-    Odd One Out
-  </button>
-</div>
-</header>
+      <!-- Slide-out settings menu FROM THE LEFT -->
+      <div id="settings-menu" class="settings-menu" hidden>
+        <h2>Settings</h2>
 
+        <div class="settings-section">
+          <h3>Difficulty</h3>
+          <label class="toggle-row">
+            <input type="checkbox" id="very-hard-toggle" />
+            <span>Very hard mode (pairs within ~4 subtiers)</span>
+          </label>
+        </div>
+
+        <div class="settings-section">
+          <h3>Appearance</h3>
+          <label class="toggle-row">
+            <input type="checkbox" id="light-mode-toggle" />
+            <span>Light mode</span>
+          </label>
+        </div>
+
+        <div class="settings-section">
+          <h3>Custom series</h3>
+          <label class="toggle-row">
+            <input type="checkbox" id="custom-mode-toggle" />
+            <span>Enable custom series filter</span>
+          </label>
+
+          <div id="custom-series-section" class="custom-series-section" hidden>
+            <p>Select series/origins to include:</p>
+            <div id="series-list" class="series-list">
+              <!-- checkboxes filled by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- NEW: Mode rules + tier scale link -->
+        <div class="settings-section">
+          <h3>Mode rules</h3>
+
+          <h4>VS Mode</h4>
+          <ul>
+            <li>You see 2 characters. Pick the one who is stronger.</li>
+            <li>Strength is based on their highest listed VS Battles tier.</li>
+          </ul>
+
+          <h4>Odd One Out</h4>
+          <ul>
+            <li>You see 4 characters at once.</li>
+            <li>3 share the same highest tier, 1 is different. Pick the different one.</li>
+          </ul>
+
+          <p style="margin-top: 6px; font-size: 0.85rem;">
+            Need to understand the tier scale?
+            <a href="https://vsbattles.fandom.com/wiki/Tiering_System#The_Scale" target="_blank" rel="noopener">
+              Open the VS Battles Tiering System (&ldquo;The Scale&rdquo;)
+            </a>
+          </p>
+        </div>
+
+        <div class="settings-actions">
+          <button id="menu-apply-button" class="control-button">
+            Apply & Restart Run
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode select buttons -->
+      <div id="mode-select" class="mode-select">
+        <button id="mode-vs-button" class="control-button">
+          VS Mode
+        </button>
+        <button id="mode-odd-button" class="control-button">
+          Odd One Out
+        </button>
+      </div>
+    </header>
 
     <main class="site-main">
+      <!-- Default VS mode section -->
       <section id="game-section">
         <div id="pair-container" class="pair-container">
           <button id="card-left" class="vs-card">
@@ -112,38 +138,42 @@
           </button>
         </div>
       </section>
+
+      <!-- Odd One Out mode section -->
       <section id="odd-mode-section">
-  <h2>Odd One Out</h2>
-  <div id="odd-streak-display" class="streak-display">
-    Odd mode loading...
-  </div>
+        <h2>Odd One Out</h2>
+        <div id="odd-streak-display" class="streak-display">
+          Odd mode loading...
+        </div>
 
-  <div class="odd-card-grid">
-    <button id="odd-card-0" class="vs-card">?</button>
-    <button id="odd-card-1" class="vs-card">?</button>
-    <button id="odd-card-2" class="vs-card">?</button>
-    <button id="odd-card-3" class="vs-card">?</button>
-  </div>
+        <div class="odd-card-grid">
+          <button id="odd-card-0" class="vs-card">?</button>
+          <button id="odd-card-1" class="vs-card">?</button>
+          <button id="odd-card-2" class="vs-card">?</button>
+          <button id="odd-card-3" class="vs-card">?</button>
+        </div>
 
-  <div class="controls">
-    <button id="odd-next-button" class="control-button" hidden>Next</button>
-    <button id="odd-restart-button" class="control-button" hidden>Restart</button>
-  </div>
-</section>
-</section>
+        <div class="controls">
+          <button id="odd-next-button" class="control-button" hidden>Next</button>
+          <button id="odd-restart-button" class="control-button" hidden>Restart</button>
+        </div>
+      </section>
     </main>
-    
 
     <footer class="site-footer">
-       <p>
-    <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'R6R21CF04Z');kofiwidget2.draw();</script> |
-    Subscribe on <a href="https://www.youtube.com/@doubletheblack" target="_blank">YouTube</a>
+      <p>
+        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+        <script type='text/javascript'>
+          kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'R6R21CF04Z');
+          kofiwidget2.draw();
+        </script>
+        |
+        Subscribe on <a href="https://www.youtube.com/@doubletheblack" target="_blank">YouTube</a>
       </p>
       <p>Vsrdle &copy; 2025</p>
     </footer>
   </div>
+
   <script type="module" src="js/main.js"></script>
 </body>
-
 </html>
-
