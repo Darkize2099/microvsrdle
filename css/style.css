@@ -196,7 +196,7 @@ body {
   width: 100%;
 }
 
-/* ========== Pair layout ========== */
+/* ========== Pair layout (VS mode) ========== */
 .pair-container {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -284,8 +284,12 @@ body {
   width: 100%;
   height: auto;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
+
+  max-height: 350px;   
+  max-width: 100%;     
 }
+
 
 .card-image-placeholder {
   font-size: 0.8rem;
@@ -351,6 +355,12 @@ body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
+  transition: opacity 0.15s ease;
+}
+
+.info-panel[hidden] {
+  display: none !important;
+  opacity: 0;
 }
 
 .info-side h3 {
@@ -406,7 +416,32 @@ body {
   opacity: 0.65;
 }
 
+/* ========== Odd One Out section ========== */
+
+#odd-mode-section {
+  display: none; /* shown when odd mode is active */
+}
+
+.odd-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+/* Odd cards share the same .vs-card styles, but text-centered is nice */
+.odd-card-grid .vs-card {
+  min-height: 80px;
+  padding: 10px;
+}
+
+.odd-card-grid .card-inner {
+  align-items: center;
+  text-align: center;
+}
+
 /* ========== Responsive tweaks ========== */
+
 @media (max-width: 700px) {
   .pair-container {
     grid-template-columns: 1fr;
@@ -434,46 +469,10 @@ body {
   .streak-display {
     text-align: left;
   }
-.info-panel {
-  transition: opacity 0.15s ease;
-}
 
-.info-panel[hidden] {
-  display: none !important;
-  opacity: 0;
-}
-
-.odd-card-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  width: 100%;
-}
-
-#odd-mode-section {
-  display: none;
-}
-
-.odd-card-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  width: 100%;
-}
-
-@media (max-width: 700px) {
   .odd-card-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-}
-
-.odd-card-grid .card-image-wrapper {
-  min-height: 80px;
-}
-
-.odd-card-grid .card-image {
-  max-height: 110px;
-  object-fit: contain;
 }
 
 /* -------------------- LIGHT THEME -------------------- */
@@ -537,5 +536,19 @@ body.light-theme .site-footer {
   opacity: 0.9;
 }
 
-
+/* Odd One Out specific image sizing */
+.odd-card-grid .odd-card-image-wrapper {
+  min-height: 80px;
+  max-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.odd-card-grid .odd-card-image {
+  max-height: 80px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+

@@ -1,8 +1,8 @@
 // js/gameLogicOdd.js
 // "Odd One Out" mode:
-// Show 4 characters. 3 have the same highestTier, 1 has a different highestTier.
+// Show 4 characters. 3 share the same highestTier, 1 has a different highestTier.
 // Player must pick the different one.
-// No repeats per run by (Name + Origin).
+// No repeats per run by (Name + Origin), and no duplicates by name within a round.
 
 import { getCharacters } from './dataLoader.js';
 import { getSettings } from './settings.js';
@@ -13,11 +13,10 @@ let oddGameState = {
   options: [],             // array of 4 characters
   oddId: null,             // the ID of the "different" one
   streak: 0,
-  usedCharacterKeys: new Set() // Name+Origin used this run
+  usedCharacterKeys: new Set() // Name+Origin used this run (across rounds)
 };
 
 export function getOddGameState() {
-  // shallow copy; usedCharacterKeys omitted intentionally
   return {
     phase: oddGameState.phase,
     options: oddGameState.options,
@@ -37,8 +36,8 @@ export function initOddGameState() {
 }
 
 /**
- * Build a stable key so duplicate tier entries for the same character
- * count as "the same character" for no-repeats.
+ * Stable key so "same character" (across tiers/JSON entries)
+ * is treated as the same for repeats and for no-dup-in-round rules.
  */
 function getCharacterKey(c) {
   const name = c.name || c._raw?.Name || '';
@@ -47,7 +46,11 @@ function getCharacterKey(c) {
 }
 
 /**
- * Apply custom filters (and Very Hard Tier 0 exclusion, if you want it consistent).
+ * Apply filters:
+ * - Very Hard mode (optionally exclude Tier 0)
+ * - Custom series filter
+ * - No repeats this run (usedCharacterKeys)
+ * - No duplicate Name+Origin entries within the pool
  */
 function buildFilteredPoolForOdd() {
   const settings = getSettings();
@@ -55,7 +58,7 @@ function buildFilteredPoolForOdd() {
 
   let pool = allChars;
 
-  // (Optional, but consistent with main game) - in Very Hard, exclude Tier 0
+  // (Consistent with main game) - in Very Hard, exclude Tier 0
   if (settings.veryHardMode) {
     pool = pool.filter(c => c.highestTier !== 'Tier 0');
   }
@@ -73,7 +76,17 @@ function buildFilteredPoolForOdd() {
   // Enforce no repeats in this run by Name+Origin
   pool = pool.filter(c => !oddGameState.usedCharacterKeys.has(getCharacterKey(c)));
 
-  return pool;
+  // ❗ New: dedupe the pool by Name+Origin so we don't get multiple entries
+  // with the same character name in a single round.
+  const dedupedByKey = new Map();
+  for (const c of pool) {
+    const key = getCharacterKey(c);
+    if (!dedupedByKey.has(key)) {
+      dedupedByKey.set(key, c);
+    }
+  }
+
+  return Array.from(dedupedByKey.values());
 }
 
 /**
@@ -81,6 +94,7 @@ function buildFilteredPoolForOdd() {
  * - Choose a "majority" tier that has at least 3 available characters
  * - Choose 3 chars from that tier
  * - Choose 1 char from a different tier
+ * All 4 must have distinct Name+Origin.
  */
 export function startNewOddRound() {
   const pool = buildFilteredPoolForOdd();
@@ -95,11 +109,11 @@ export function startNewOddRound() {
   const groups = new Map();
   for (const c of pool) {
     if (!c.highestTier) continue;
-    const key = c.highestTier;
-    if (!groups.has(key)) {
-      groups.set(key, []);
+    const tier = c.highestTier;
+    if (!groups.has(tier)) {
+      groups.set(tier, []);
     }
-    groups.get(key).push(c);
+    groups.get(tier).push(c);
   }
 
   const tierKeys = Array.from(groups.keys());
@@ -130,17 +144,17 @@ export function startNewOddRound() {
   }
 
   // Pick majority tier randomly
-  const majorityTier = candidateMajorTiers[Math.floor(Math.random() * candidateMajorTiers.length)];
+  const majorityTier =
+    candidateMajorTiers[Math.floor(Math.random() * candidateMajorTiers.length)];
   const majorityGroup = groups.get(majorityTier);
 
-  // Randomly pick 3 distinct characters from majorityGroup
-  if (majorityGroup.length < 3) {
-    // Shouldn't happen due to filter above, but guard anyway.
+  if (!majorityGroup || majorityGroup.length < 3) {
     console.error('Odd mode: majority group unexpectedly has < 3 characters.');
     oddGameState.phase = 'error';
     return;
   }
 
+  // Randomly pick 3 distinct characters from majorityGroup
   const majorityChars = pickRandomDistinct(majorityGroup, 3);
   if (!majorityChars || majorityChars.length < 3) {
     console.error('Odd mode: failed to pick 3 distinct majority characters.');
@@ -149,7 +163,11 @@ export function startNewOddRound() {
   }
 
   // Now pick odd-one-out tier: any tier != majorityTier with >=1 char
-  const otherTiers = tierKeys.filter(tier => tier !== majorityTier && (groups.get(tier) || []).length > 0);
+  const otherTiers = tierKeys.filter(tier => (
+    tier !== majorityTier &&
+    (groups.get(tier) || []).length > 0
+  ));
+
   if (otherTiers.length === 0) {
     console.error('Odd mode: no different tier for odd-one-out.');
     oddGameState.phase = 'error';
@@ -166,8 +184,27 @@ export function startNewOddRound() {
 
   const oddChar = oddGroup[Math.floor(Math.random() * oddGroup.length)];
 
-  // Combine and shuffle the 4 options
-  const options = shuffleArray([...majorityChars, oddChar]);
+  // Build final options and ensure they still have unique Name+Origin
+  let options = shuffleArray([...majorityChars, oddChar]);
+
+  // (Extra safety) remove any accidental same-name collisions.
+  const seenKeys = new Set();
+  const uniqueOptions = [];
+  for (const c of options) {
+    const key = getCharacterKey(c);
+    if (seenKeys.has(key)) continue;
+    seenKeys.add(key);
+    uniqueOptions.push(c);
+  }
+
+  // If we somehow ended with <4 due to dedup, bail gracefully.
+  if (uniqueOptions.length < 4) {
+    console.error('Odd mode: could not form 4 unique-name options.');
+    oddGameState.phase = 'error';
+    return;
+  }
+
+  options = uniqueOptions;
 
   oddGameState.options = options;
   oddGameState.oddId = oddChar.id;
@@ -178,7 +215,11 @@ export function startNewOddRound() {
  * Player clicked one of the 4 cards.
  */
 export function handleOddChoice(selectedId) {
-  if (oddGameState.phase !== 'inRound' || !oddGameState.options || oddGameState.options.length !== 4) {
+  if (
+    oddGameState.phase !== 'inRound' ||
+    !oddGameState.options ||
+    oddGameState.options.length !== 4
+  ) {
     return { valid: false, message: 'Not ready for selection.' };
   }
 

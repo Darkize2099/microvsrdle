@@ -1,9 +1,9 @@
 // js/uiOdd.js
-// UI for "Odd One Out" mode (4 cards).
-// Visual style matches VS mode: vs-card, card-inner, image, tiers on result.
+// UI for "Odd One Out" mode with updated image handling identical to ui.js.
 
 import { getOddGameState, startNewOddRound, handleOddChoice, restartOddGame } from './gameLogicOdd.js';
 import { getStats } from './stats.js';
+import { getPrimaryImageUrl, getAltImageUrls } from './ui.js'; // <-- re-use same helpers!
 
 let oddEls = {};
 
@@ -112,10 +112,27 @@ function renderOddCardContent(cardElement, character, state) {
 
   const isResultPhase = state.phase === 'afterCorrect' || state.phase === 'afterWrong';
 
+  // IMAGE SELECTION — SAME AS VS MODE
+  const primaryImageUrl = getPrimaryImageUrl(character);
+  const altImageUrls = getAltImageUrls(character);
+
+  const hasAnyImage = !!primaryImageUrl || altImageUrls.length > 0;
+  const altImagesAttr = altImageUrls.length ? altImageUrls.join('|') : '';
+
   cardElement.innerHTML = `
     <div class="card-inner">
       <div class="card-name">${character.name}</div>
       <div class="card-origin">${character.origin}</div>
+      <div class="card-image-wrapper">
+        ${
+          hasAnyImage
+            ? `<img src="${primaryImageUrl || altImageUrls[0]}"
+                     alt="${character.name}"
+                     class="card-image"
+                     data-alt-images="${altImagesAttr}" />`
+            : `<div class="card-image card-image-placeholder">No image</div>`
+        }
+      </div>
       ${
         isResultPhase
           ? `<div class="card-tier">
@@ -126,8 +143,29 @@ function renderOddCardContent(cardElement, character, state) {
       }
     </div>
   `;
-}
 
+  // FALLBACK LOGIC IDENTICAL TO VS MODE
+  if (hasAnyImage) {
+    const img = cardElement.querySelector('.card-image');
+    if (img) {
+      let altList = [];
+      if (img.dataset.altImages) {
+        altList = img.dataset.altImages.split('|').filter(Boolean);
+        const currentSrc = img.getAttribute('src');
+        altList = altList.filter(url => url !== currentSrc);
+      }
+
+      img.addEventListener('error', function handleError() {
+        if (altList.length > 0) {
+          img.src = altList.shift();
+        } else {
+          img.removeEventListener('error', handleError);
+          img.src = 'https://via.placeholder.com/256x256?text=No+Image';
+        }
+      });
+    }
+  }
+}
 
 function renderOddButtons(state) {
   if (oddEls.nextButton) {

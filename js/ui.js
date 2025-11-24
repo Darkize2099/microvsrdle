@@ -6,6 +6,55 @@ import { getStats } from './stats.js';
 import { getCharacters } from './dataLoader.js';
 import { getSettings, updateSetting } from './settings.js';
 
+
+function cleanWikiImageUrl(url) {
+  if (!url) return '';
+  const trimmed = url.trim();
+  const idx = trimmed.indexOf('/revision/');
+  if (idx !== -1) {
+    // Drop "/revision/latest?cb=..." and anything after it
+    return trimmed.slice(0, idx);
+  }
+  return trimmed;
+}
+
+function getPrimaryImageUrl(character) {
+  if (!character) return '';
+
+  let url = '';
+
+  // 1) If imageUrl exists and looks like a full URL, use it
+  if (character.imageUrl && /^https?:\/\//i.test(character.imageUrl)) {
+    url = character.imageUrl;
+  } else if (character._raw && character._raw.ImageURL) {
+    // 2) Use raw JSON ImageURL if present
+    url = character._raw.ImageURL;
+  } else if (character.ImageURL) {
+    // 3) Or a direct ImageURL property
+    url = character.ImageURL;
+  } else if (character.altImageUrls && character.altImageUrls.length > 0) {
+    // 4) Fall back to first altImageUrls entry if it's a full URL
+    const firstAlt = character.altImageUrls[0];
+    if (/^https?:\/\//i.test(firstAlt)) {
+      url = firstAlt;
+    }
+  }
+
+  return cleanWikiImageUrl(url);
+}
+
+
+function getAltImageUrls(character) {
+  if (!character || !character.altImageUrls || !character.altImageUrls.length) {
+    return [];
+  }
+
+  return character.altImageUrls
+    .map(cleanWikiImageUrl)
+    .filter(url => /^https?:\/\//i.test(url));
+}
+
+
 let els = {};
 let infoPanelVisible = false;
 
@@ -56,7 +105,6 @@ export function initUI() {
   els.seriesList = document.getElementById('series-list');
   els.menuApplyButton = document.getElementById('menu-apply-button');
   els.lightModeToggle = document.getElementById('light-mode-toggle');
-
 
   if (els.menuToggle && els.settingsMenu) {
     els.menuToggle.addEventListener('click', toggleMenu);
@@ -280,10 +328,13 @@ function renderCard(cardElement, character, state) {
 
   cardElement.className = `${baseClass}${extraClass}`;
 
-  const hasAnyImage = character.imageUrl || (character.altImageUrls && character.altImageUrls.length);
-  const altImagesAttr = (character.altImageUrls && character.altImageUrls.length)
-    ? character.altImageUrls.join('|')
-    : '';
+  // --- Wiki URL–aware image handling ---
+
+  const primaryImageUrl = getPrimaryImageUrl(character);
+  const altImageUrls = getAltImageUrls(character);
+
+  const hasAnyImage = !!primaryImageUrl || altImageUrls.length > 0;
+  const altImagesAttr = altImageUrls.length ? altImageUrls.join('|') : '';
 
   cardElement.innerHTML = `
     <div class="card-inner">
@@ -292,7 +343,7 @@ function renderCard(cardElement, character, state) {
       <div class="card-image-wrapper">
         ${
           hasAnyImage
-            ? `<img src="${character.imageUrl || character.altImageUrls[0]}"
+            ? `<img src="${primaryImageUrl || altImageUrls[0]}"
                      alt="${character.name}"
                      class="card-image"
                      data-alt-images="${altImagesAttr}" />`
@@ -327,7 +378,8 @@ function renderCard(cardElement, character, state) {
           img.src = next;
         } else {
           img.removeEventListener('error', handleError);
-          img.src = 'images/placeholder.png';
+          // Generic online placeholder to avoid 404s
+          img.src = 'https://via.placeholder.com/256x256?text=No+Image';
         }
       });
     }
@@ -395,4 +447,4 @@ function restartAndRenderNewRound() {
   render();
 }
 
-
+export { getPrimaryImageUrl, getAltImageUrls };
