@@ -1,8 +1,4 @@
-// js/gameLogicOdd.js
-// "Odd One Out" mode:
-// Show 4 characters. 3 share the same highestTier, 1 has a different highestTier.
-// Player must pick the different one.
-// No repeats per run by (Name + Origin), and no duplicates by name within a round.
+
 
 import { getCharacters } from './dataLoader.js';
 import { getSettings } from './settings.js';
@@ -10,10 +6,10 @@ import { recordRound } from './stats.js';
 
 let oddGameState = {
   phase: 'loading',        // 'loading' | 'inRound' | 'afterCorrect' | 'afterWrong' | 'error'
-  options: [],             // array of 4 characters
-  oddId: null,             // the ID of the "different" one
+  options: [],             
+  oddId: null,             
   streak: 0,
-  usedCharacterKeys: new Set() // Name+Origin used this run (across rounds)
+  usedCharacterKeys: new Set() 
 };
 
 export function getOddGameState() {
@@ -35,23 +31,14 @@ export function initOddGameState() {
   };
 }
 
-/**
- * Stable key so "same character" (across tiers/JSON entries)
- * is treated as the same for repeats and for no-dup-in-round rules.
- */
+
 function getCharacterKey(c) {
   const name = c.name || c._raw?.Name || '';
   const origin = c.origin || c._raw?.Origin || '';
   return `${name}::${origin}`;
 }
 
-/**
- * Apply filters:
- * - Very Hard mode (optionally exclude Tier 0)
- * - Custom series filter
- * - No repeats this run (usedCharacterKeys)
- * - No duplicate Name+Origin entries within the pool
- */
+
 function buildFilteredPoolForOdd() {
   const settings = getSettings();
   const allChars = getCharacters();
@@ -76,7 +63,7 @@ function buildFilteredPoolForOdd() {
   // Enforce no repeats in this run by Name+Origin
   pool = pool.filter(c => !oddGameState.usedCharacterKeys.has(getCharacterKey(c)));
 
-  // ❗ New: dedupe the pool by Name+Origin so we don't get multiple entries
+  // New: dedupe the pool by Name+Origin so we don't get multiple entries
   // with the same character name in a single round.
   const dedupedByKey = new Map();
   for (const c of pool) {

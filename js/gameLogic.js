@@ -1,8 +1,3 @@
-// js/gameLogic.js
-// Core gameplay rules for Vsrdle.
-// - No repeats in a run (by Name + Origin)
-// - Very Hard mode enforces ≥ 3 subtier spacing and excludes Tier 0
-// - Custom series mode restricts available characters by origin
 
 import { getCharacters } from './dataLoader.js';
 import { getStrongerCharacter, getTierIndex } from './tierUtils.js';
@@ -31,18 +26,14 @@ export function initGameState() {
   };
 }
 
-/**
- * Deduplicate repeats by Name + Origin
- */
+
 function getCharacterKey(c) {
   const name = c.name || c._raw?.Name || '';
   const origin = c.origin || c._raw?.Origin || '';
   return `${name}::${origin}`;
 }
 
-/**
- * Apply mode filters and group characters by highestTier
- */
+
 function buildFilteredGroups() {
   const settings = getSettings();
   const allChars = getCharacters();
@@ -76,10 +67,7 @@ function buildFilteredGroups() {
   return groups;
 }
 
-/**
- * Pick a character from a group, enforcing:
- * - No repeats by Name + Origin within the same run
- */
+
 function pickCharacterFromGroup(group) {
   if (!group || !group.length) return null;
   const available = group.filter(c => !gameState.usedCharacterKeys.has(getCharacterKey(c)));
@@ -87,11 +75,7 @@ function pickCharacterFromGroup(group) {
   return available[Math.floor(Math.random() * available.length)];
 }
 
-/**
- * Create a valid pair according to mode rules:
- * - Normal: any two different subtiers
- * - Very Hard: subtier distance ≥ 3
- */
+
 export function startNewRound() {
   const settings = getSettings();
   const groups = buildFilteredGroups();
@@ -114,9 +98,15 @@ export function startNewRound() {
       const distance = Math.abs(idxA - idxB);
 
       if (settings.veryHardMode) {
-        if (distance >= 3) candidatePairs.push([tA, tB]);
+        
+        if (distance === 3) {
+          candidatePairs.push([tA, tB]);
+        }
       } else {
-        candidatePairs.push([tA, tB]);
+        
+        if (distance > 0) {
+          candidatePairs.push([tA, tB]);
+        }
       }
     }
   }
