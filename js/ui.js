@@ -1,5 +1,3 @@
-// js/ui.js
-// Handles DOM + wiring for the default two-card mode and settings menu + Rules modal.
 
 import { getGameState, handleChoice, startNewRound, restartGame } from './gameLogic.js';
 import { getStats } from './stats.js';
@@ -305,7 +303,6 @@ function renderCard(cardElement, character, state) {
       ${
         isResultPhase
           ? `<div class="card-tier">
-               <span class="card-main-tier">${character.mainTier || '-'}</span>
                <span class="card-sub-tier">${character.highestTier || '-'}</span>
              </div>`
           : ''
